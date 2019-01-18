@@ -41,7 +41,19 @@ shellunregister() {
   fi
 }
 
-while getopts "a:r:u:hc" o; do
+filetransfer() {
+  SSH_CLIENT_IP=$(echo $SSH_CLIENT | awk '{print $1}')
+  FILENAME=$(echo "$SSH_ORIGINAL_COMMAND" | cut -d" " -f 2- | sed -e 's#/#_#g')
+  if [ ! "$FILENAME" ]
+  then
+    FILENAME="output_$(date +%s)"
+  fi
+  echo "File transfer mode saving to ${SSH_CLIENT_IP}/${FILENAME}"
+  mkdir -p /tmp/sshshell/files/${SSH_CLIENT_IP}/
+  cat - > /tmp/sshshell/files/${SSH_CLIENT_IP}/${FILENAME}
+}
+
+while getopts "a:r:u:hcs" o; do
   case "${o}" in
     a)
       ADD_SSHPUBKEY=1
@@ -64,6 +76,13 @@ while getopts "a:r:u:hc" o; do
   esac
 done
 
+# Client commands
+SSH_COMMAND=$(echo $SSH_ORIGINAL_COMMAND | awk '{print $1}')
+if [ "$SSH_COMMAND" = "transfer" ]
+then
+filetransfer
+  exit
+fi
 
 if [ "${CONNECTION}" == "1" ]
 then
@@ -124,8 +143,8 @@ _EOM_
   fi
 fi
 
-CONNECTIONS=`ls -1 /tmp/sshshell/`
-CONNECTION_COUNT=`ls -1 /tmp/sshshell/ | wc -l`
+CONNECTIONS=`ls -1p /tmp/sshshell/ | grep -v /`
+CONNECTION_COUNT=$(echo "$CONNECTIONS" | wc -l)
 if [ $CONNECTION_COUNT -eq 0 ]
 then
   echo "No current connections"
