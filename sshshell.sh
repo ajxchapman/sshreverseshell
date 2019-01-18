@@ -60,11 +60,15 @@ while getopts "a:r:u:hcs" o; do
   case "${o}" in
     a)
       ADD_SSHPUBKEY=1
-      SSHPUBKEY=${OPTARG}
+      shift
+      SSHPUBKEY=$@
+      break
       ;;
     r)
       REMOVE_SSHPUBKEY=1
-      SSHPUBKEY=${OPTARG}
+      shift
+      SSHPUBKEY=$@
+      break
       ;;
     u)
       USER=${OPTARG}
