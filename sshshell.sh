@@ -92,13 +92,22 @@ then
   exit
 fi
 
+# Server commands
+mkdir -p /tmp/sshshell/files
+chmod -R 777 /tmp/sshshell
+if ! id -u $USER 2>&1 > /dev/null
+then
+  echo "Remote shell user '${USER}' does not exist, exiting..."
+  exit
+fi
+
 if [ "${ADD_SSHPUBKEY}${REMOVE_SSHPUBKEY}" == "1" ]
 then
   if [ -f ${SSHPUBKEY} ]
   then
     SSHPUBKEY=`cat ${SSHPUBKEY}`
   fi
-  
+
   SSHPUBKEY_ID=`echo ${SSHPUBKEY} | sha1sum | awk '{print $1}'`
   mkdir -p /home/${USER}/.ssh
   AUTHORIZEDKEYS_PATH="/home/${USER}/.ssh/authorized_keys"
