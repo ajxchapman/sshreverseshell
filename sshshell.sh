@@ -224,7 +224,7 @@ else
 _EOF_
   ) <(cat << _EOF_
   reset; export SHELL=bash; export TERM=xterm-256color; stty rows `tput lines` columns `tput cols`
-  transfer() { cat \$1 | ssh -i \${SSH_IDENTITY_FILE:-~/.ssh.id_ras} -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" ${USER}@${SSH_SERVER_IP} transfer "\$1" ; }
+  transfer() { cat \$1 | ssh -i \${SSH_IDENTITY_FILE:-~/.ssh/id_rsa} -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" ${USER}@${SSH_SERVER_IP} transfer "\$1" ; }
   id
 _EOF_
   ) - | nc -vv 127.0.0.1 $SSHSHELL_PORT
