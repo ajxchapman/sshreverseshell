@@ -219,7 +219,7 @@ else
   # Attempt to send the commands to upgrade to a full TTY automatically
   stty raw -echo
   cat <(cat << _EOF_
-  { script 2>/dev/null ||  python -c 'import pty; pty.spawn("/bin/bash")' || echo No pty available ; exit ; }
+  { python3 -c 'import pty; pty.spawn("/bin/bash")' 2>/dev/null || python2 -c 'import pty; pty.spawn("/bin/bash")' 2>/dev/null || script 2>/dev/null || echo No pty available ; exit ; }
 _EOF_
   ) <(cat << _EOF_
   reset; export SHELL=bash; export TERM=xterm-256color; stty rows `tput lines` columns `tput cols`
