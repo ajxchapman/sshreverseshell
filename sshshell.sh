@@ -54,6 +54,7 @@ filetransfer() {
   echo "File transfer mode saving to ${SSH_CLIENT_IP}/${FILENAME}"
   mkdir -p /tmp/sshshell/files/${SSH_CLIENT_IP}/
   cat - > /tmp/sshshell/files/${SSH_CLIENT_IP}/${FILENAME}
+  echo "Received $(wc -c /tmp/sshshell/files/${SSH_CLIENT_IP}/${FILENAME} | awk '{print $1}') bytes"
 }
 
 while getopts "a:r:u:hcs" o; do
