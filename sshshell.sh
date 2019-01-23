@@ -113,7 +113,7 @@ fi
 
 if [ "${ADD_SSHPUBKEY}${REMOVE_SSHPUBKEY}" == "1" ]
 then
-  if [ -f ${SSHPUBKEY} ]
+  if [ -f "${SSHPUBKEY}" ]
   then
     SSHPUBKEY=`cat ${SSHPUBKEY}`
   fi
