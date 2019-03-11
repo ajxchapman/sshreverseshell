@@ -223,7 +223,7 @@ else
   { python3 -c 'import pty; pty.spawn("/bin/bash")' 2>/dev/null || python2 -c 'import pty; pty.spawn("/bin/bash")' 2>/dev/null || script 2>/dev/null || echo No pty available ; exit ; }
 _EOF_
   ) <(cat << _EOF_
-  reset; export SHELL=bash; export TERM=xterm-256color; stty rows `tput lines` columns `tput cols`
+  reset screen-256color; export SHELL=bash; export TERM=xterm-256color; stty rows `tput lines` columns `tput cols`
   transfer() { cat \$1 | ssh -i \${SSH_IDENTITY_FILE:-~/.ssh/id_rsa} -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" ${USER}@${SSH_SERVER_IP} transfer "\$1" ; }
   id
 _EOF_
