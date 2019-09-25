@@ -163,8 +163,8 @@ _EOM_
   fi
 fi
 
-CONNECTIONS=`ls -1p /tmp/sshshell/ | grep -v /`
-CONNECTION_COUNT=$(echo "$CONNECTIONS" | wc -l)
+CONNECTIONS=$(ls -1p /tmp/sshshell/ | grep -v /)
+CONNECTION_COUNT=$(ls -1p /tmp/sshshell/ | grep -v / | wc -l)
 if [ $CONNECTION_COUNT -eq 0 ]
 then
   echo "No current connections"
@@ -202,9 +202,9 @@ SSHSHELL_PORT=`echo $SSHSHELL_PIPE_ID | cut -d _ -f 2`
 if [ "${SIMPLE}" == "1" ]
 then
   cat << _EOM_
-Upgrade to a full TTY:
+If you would like to upgrade to a full TTY:
 * Launch a ptty:
-  $ python -c 'import pty; pty.spawn("/bin/bash")'
+  $ python3 -c 'import pty; pty.spawn("/bin/bash")'
   or
   $ script
 * Background the process (Ctrl+z)
@@ -219,14 +219,6 @@ else
 
   # Attempt to send the commands to upgrade to a full TTY automatically
   stty raw -echo
-  cat <(cat << _EOF_
-  { python3 -c 'import pty; pty.spawn("/bin/bash")' 2>/dev/null || python2 -c 'import pty; pty.spawn("/bin/bash")' 2>/dev/null || script 2>/dev/null || echo No pty available ; exit ; }
-_EOF_
-  ) <(cat << _EOF_
-  reset screen-256color; export SHELL=bash; export TERM=xterm-256color; stty rows `tput lines` columns `tput cols`
-  transfer() { cat \$1 | ssh -i \${SSH_IDENTITY_FILE:-~/.ssh/id_rsa} -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" ${USER}@${SSH_SERVER_IP} transfer "\$1" ; }
-  id
-_EOF_
-  ) - | nc -vv 127.0.0.1 $SSHSHELL_PORT
+  cat <(cat pty.sh) <(cat rc.sh) - | nc -vv 127.0.0.1 $SSHSHELL_PORT
   reset
 fi
