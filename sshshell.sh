@@ -51,6 +51,15 @@ filetransfer() {
   then
     FILENAME="output_$(date +%s)"
   fi
+  if [ -f "/tmp/sshshell/files/${SSH_CLIENT_IP}/$FILENAME" ]
+  then
+    COUNT=1
+    while [ -f "/tmp/sshshell/files/${SSH_CLIENT_IP}/${FILENAME}.${COUNT}" ]
+    do
+      COUNT=$((${COUNT}+1))
+    done
+    FILENAME="${FILENAME}.${COUNT}"
+  fi
   echo "File transfer mode saving to ${SSH_CLIENT_IP}/${FILENAME}"
   mkdir -p /tmp/sshshell/files/${SSH_CLIENT_IP}/
   cat - > /tmp/sshshell/files/${SSH_CLIENT_IP}/${FILENAME}
